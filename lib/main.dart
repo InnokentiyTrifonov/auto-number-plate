@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_application_3/licence_plate.dart';
 
 void main() {
   runApp(const MyApp());
@@ -28,7 +29,8 @@ class MyHomePage extends StatefulWidget {
 class _MyHomePageState extends State<MyHomePage> {
   final _formKey = GlobalKey<FormState>();
   String? govAutoNum;
-  List<String> splited = [];
+  late LicencePlate plate;
+
   @override
   Widget build(BuildContext context) {
     final mediaQuery = MediaQuery.of(context);
@@ -66,6 +68,8 @@ class _MyHomePageState extends State<MyHomePage> {
                                   r'^[0-9]{2}[K]{1}[G]{1}[0-9]{3}[A-Z]{3}')
                               .hasMatch(value)) {
                             return 'Введите корректный номер';
+                          } else if (!isValidRegion(value[0] + value[1])) {
+                            return 'Регион не верен';
                           } else {
                             return null;
                           }
@@ -76,49 +80,30 @@ class _MyHomePageState extends State<MyHomePage> {
                           });
                         },
                       ),
-                      SizedBox(
-                        height: mediaQuery.size.height * 0.04,
-                      ),
-                      Row(
-                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                        children: [
-                          Text(
+                      MaterialButton(
+                          child: const Text(
                             'Поехали',
-                            style: TextStyle(
-                              fontFamily: 'Fe-Font',
-                              fontSize: mediaQuery.size.width * 0.05,
-                              color: Colors.purpleAccent,
-                            ),
                           ),
-                          MaterialButton(
-                              color: Colors.deepPurple,
-                              minWidth: mediaQuery.size.width * 0.15,
-                              height: mediaQuery.size.width * 0.07,
-                              onPressed: () {
-                                if (_formKey.currentState!.validate()) {
-                                  splited = govAutoNum!.split('');
-                                  ScaffoldMessenger.of(context)
-                                      .showSnackBar(const SnackBar(
-                                    duration: Duration(seconds: 1),
-                                    content: Text(
-                                      'Молодьэс',
-                                      style: TextStyle(color: Colors.white),
-                                    ),
-                                    backgroundColor: Colors.green,
+                          onPressed: () {
+                            if (_formKey.currentState!.validate()) {
+                              plate = LicencePlate(
+                                region:
+                                    getRegion(govAutoNum![0] + govAutoNum![1]),
+                                stateCode: govAutoNum![2] + govAutoNum![3],
+                                number: govAutoNum![4] +
+                                    govAutoNum![5] +
+                                    govAutoNum![6],
+                                serialNumber: govAutoNum![7] +
+                                    govAutoNum![8] +
+                                    govAutoNum![9],
+                              );
+                              Navigator.push(
+                                  context,
+                                  MaterialPageRoute(
+                                    builder: (context) => NumPage(plate: plate),
                                   ));
-                                  Future.delayed(const Duration(seconds: 2),
-                                      () {
-                                    Navigator.push(
-                                        context,
-                                        MaterialPageRoute(
-                                          builder: (context) =>
-                                              NumPage(govNumList: splited),
-                                        ));
-                                  });
-                                }
-                              })
-                        ],
-                      )
+                            }
+                          })
                     ],
                   ))
             ],
@@ -128,267 +113,110 @@ class _MyHomePageState extends State<MyHomePage> {
 }
 
 class NumPage extends StatelessWidget {
-  final List<String> govNumList;
-  const NumPage({super.key, required this.govNumList});
+  final LicencePlate plate;
+  const NumPage({super.key, required this.plate});
 
   @override
   Widget build(BuildContext context) {
-    var govNumReg = govNumList[0] + govNumList[1];
-    var govReg = govNumList[2] + govNumList[3];
-    var govAutoNum = govNumList[4] + govNumList[5] + govNumList[6];
-    var govAutoReg = govNumList[7] + govNumList[8] + govNumList[9];
-    final mediaQuery = MediaQuery.of(context);
     return Scaffold(
-        appBar: AppBar(
-          leading: GestureDetector(
-            child: const Icon(Icons.arrow_back_ios_new),
-            onTap: () {
-              Navigator.pop(context);
-            },
-          ),
+      appBar: AppBar(
+        title: Text(plate.getRegionTitle()),
+        leading: GestureDetector(
+          child: const Icon(Icons.arrow_back_ios_new),
+          onTap: () {
+            Navigator.pop(context);
+          },
         ),
-        body: Center(
-          child: Row(
-            mainAxisSize: MainAxisSize.min,
-            children: [
-              ConstrainedBox(
-                constraints: const BoxConstraints(
-                  minHeight: 50.0,
-                  minWidth: 50.0,
-                  maxHeight: 50.0,
-                  maxWidth: 50.0,
-                ),
-                child: Container(
+      ),
+      body: Center(
+        child: Container(
+          decoration: BoxDecoration(
+              border: Border.all(width: 0.5),
+              borderRadius: BorderRadius.circular(5)),
+          child: Container(
+            margin: const EdgeInsets.all(2),
+            width: 300,
+            height: 61,
+            decoration: BoxDecoration(
+              border: Border.all(width: 1.5),
+              borderRadius: BorderRadius.circular(5),
+            ),
+            child: Row(
+              children: [
+                Container(
+                  width: 80.79,
                   decoration: const BoxDecoration(
-                      border: Border(
-                    right: BorderSide.none,
-                    top: BorderSide(width: 5),
-                    bottom: BorderSide(width: 5),
-                    left: BorderSide(width: 5),
-                  )),
+                      border: Border(right: BorderSide(width: 1.5))),
                   child: Column(
-                    mainAxisSize: MainAxisSize.min,
-                    crossAxisAlignment: CrossAxisAlignment.center,
-                    children: [
-                      Container(
-                        margin: const EdgeInsets.only(
-                          top: 5,
-                        ),
-                        child: Text(
-                          govNumReg,
-                          style: const TextStyle(
-                            fontWeight: FontWeight.w600,
-                            fontSize: 15,
-                            fontFamily: 'Fe-Font',
-                          ),
-                        ),
-                      ),
-                      Container(
-                        margin: const EdgeInsets.only(
-                          top: 5,
-                        ),
-                        child: Row(
-                          mainAxisAlignment: MainAxisAlignment.center,
-                          children: [
-                            Container(
-                              margin: const EdgeInsets.only(
-                                top: 3,
-                              ),
-                              width: 17,
-                              height: 12,
-                              decoration: const BoxDecoration(
-                                  image: DecorationImage(
-                                image: AssetImage('assets/kgflag.jpg'),
-                                fit: BoxFit.cover,
-                              )),
-                            ),
-                            const SizedBox(
-                              width: 2,
-                            ),
-                            Text(
-                              govReg,
-                              style: const TextStyle(
-                                fontWeight: FontWeight.w600,
-                                fontSize: 13,
-                                fontFamily: 'Fe-Font',
-                              ),
-                            ),
-                          ],
-                        ),
-                      ),
-                    ],
-                  ),
-                ),
-              ),
-              ConstrainedBox(
-                constraints: const BoxConstraints(
-                  minHeight: 50.0,
-                  minWidth: 50.0,
-                  maxHeight: 50.0,
-                  maxWidth: 150.0,
-                ),
-                child: Container(
-                  decoration: BoxDecoration(
-                    border: Border.all(width: 5),
-                  ),
-                  child: Row(
                     mainAxisAlignment: MainAxisAlignment.center,
                     children: [
-                      Padding(
-                        padding: const EdgeInsets.only(bottom: 12),
-                        child: Text(
-                          govAutoNum,
-                          style: const TextStyle(
-                            fontWeight: FontWeight.w600,
-                            fontSize: 30,
-                            fontFamily: 'Fe-Font',
-                          ),
-                        ),
+                      Row(
+                        mainAxisAlignment: MainAxisAlignment.center,
+                        crossAxisAlignment: CrossAxisAlignment.end,
+                        children: [
+                          Text(
+                            plate.getRegionString(),
+                            style: const TextStyle(
+                                fontSize: 28,
+                                fontFamily: 'Fe-Font',
+                                fontWeight: FontWeight.w100),
+                          )
+                        ],
                       ),
-                      Padding(
-                        padding: const EdgeInsets.only(bottom: 12),
-                        child: Text(
-                          govAutoReg,
-                          style: const TextStyle(
-                            fontWeight: FontWeight.w600,
-                            fontSize: 30,
-                            fontFamily: 'Fe-Font',
-                          ),
+                      Container(
+                        margin: const EdgeInsets.only(top: 3),
+                        child: Row(
+                          mainAxisAlignment: MainAxisAlignment.center,
+                          crossAxisAlignment: CrossAxisAlignment.end,
+                          children: [
+                            Image.asset(
+                              plate.getCountryFlagImageAsset(),
+                              height: 14,
+                            ),
+                            const SizedBox(width: 4),
+                            Text(
+                              plate.stateCode,
+                              style: const TextStyle(
+                                  fontSize: 14,
+                                  fontFamily: 'Fe-Font',
+                                  fontWeight: FontWeight.w100),
+                            ),
+                          ],
                         ),
                       ),
                     ],
                   ),
                 ),
-              )
-            ],
-          ),
-        ));
-  }
-}
-
-/*class NumPage extends StatelessWidget {
-  final List<String> govNumList;
-  const NumPage({super.key, required this.govNumList});
-
-  @override
-  Widget build(BuildContext context) {
-    var govNumReg = govNumList[0] + govNumList[1];
-    var govReg = govNumList[2] + govNumList[3];
-    var govAutoNum = govNumList[4] + govNumList[5] + govNumList[6];
-    var govAutoReg = govNumList[7] + govNumList[8] + govNumList[9];
-    final mediaQuery = MediaQuery.of(context);
-    return Scaffold(
-        appBar: AppBar(
-          leading: GestureDetector(
-            child: const Icon(Icons.arrow_back_ios_new),
-            onTap: () {
-              Navigator.pop(context);
-            },
-          ),
-        ),
-        body: SafeArea(
-          child: Padding(
-            padding: EdgeInsets.only(
-              left: mediaQuery.size.width * 0.03,
-              right: mediaQuery.size.width * 0.03,
-            ),
-            child: Center(
-              child: Row(
-                mainAxisAlignment: MainAxisAlignment.center,
-                children: [
-                  Container(
-                    decoration: BoxDecoration(
-                        border: Border(
-                      left: BorderSide(width: mediaQuery.size.width * 0.008),
-                      top: BorderSide(width: mediaQuery.size.width * 0.008),
-                      bottom: BorderSide(width: mediaQuery.size.width * 0.008),
-                    )),
+                Container(
+                  width: 216.21,
+                  height: 61,
+                  color: Colors.transparent,
+                  child: Center(
                     child: Row(
                       mainAxisAlignment: MainAxisAlignment.center,
+                      crossAxisAlignment: CrossAxisAlignment.end,
                       children: [
-                        Row(
-                          mainAxisAlignment: MainAxisAlignment.center,
-                          children: [
-                            Text(
-                              govNumReg,
-                              style: TextStyle(
-                                  fontFamily: 'Fe-Font',
-                                  fontSize: mediaQuery.size.height * 0.029,
-                                  fontWeight: FontWeight.bold),
-                            ),
-                          ],
+                        Text(
+                          plate.number,
+                          style: const TextStyle(
+                              fontSize: 42,
+                              fontFamily: 'Fe-Font',
+                              fontWeight: FontWeight.w100),
                         ),
-                        SizedBox(height: mediaQuery.size.height * 0.017),
-                        Row(
-                          mainAxisAlignment: MainAxisAlignment.center,
-                          children: [
-                            Container(
-                              width: mediaQuery.size.width * 0.04,
-                              height: mediaQuery.size.height * 0.015,
-                              decoration: const BoxDecoration(
-                                  image: DecorationImage(
-                                image: AssetImage('assets/kgflag.jpg'),
-                                fit: BoxFit.cover,
-                              )),
-                            ),
-                            SizedBox(
-                              width: mediaQuery.size.width * 0.005,
-                            ),
-                            Container(
-                              width: mediaQuery.size.width * 0.04,
-                              height: mediaQuery.size.height * 0.015,
-                              child: Text(
-                                govReg,
-                                style: TextStyle(
-                                  fontFamily: 'Fe-Font',
-                                  fontSize: mediaQuery.size.height * 0.013,
-                                ),
-                              ),
-                            )
-                          ],
-                        ),
+                        Text(plate.serialNumber,
+                            style: const TextStyle(
+                                fontSize: 34,
+                                fontFamily: 'Fe-Font',
+                                fontWeight: FontWeight.w100)),
                       ],
                     ),
                   ),
-                  Container(
-                      decoration: BoxDecoration(
-                          border: Border.all(
-                              width: mediaQuery.size.width * 0.008,
-                              color: Colors.black)),
-                      child: Row(
-                          crossAxisAlignment: CrossAxisAlignment.center,
-                          children: [
-                            Padding(
-                              padding: EdgeInsets.only(
-                                  bottom: mediaQuery.size.height * 0.02,
-                                  left: mediaQuery.size.height * 0.01,
-                                  right: mediaQuery.size.height * 0.002),
-                              child: Text(
-                                govAutoNum,
-                                style: TextStyle(
-                                    fontFamily: 'Fe-Font',
-                                    fontSize: mediaQuery.size.height * 0.048,
-                                    fontWeight: FontWeight.bold),
-                              ),
-                            ),
-                            Padding(
-                              padding: EdgeInsets.only(
-                                bottom: mediaQuery.size.height * 0.007,
-                              ),
-                              child: Text(
-                                govAutoReg,
-                                style: TextStyle(
-                                    fontFamily: 'Fe-Font',
-                                    fontSize: mediaQuery.size.height * 0.039,
-                                    fontWeight: FontWeight.bold),
-                              ),
-                            ),
-                          ]))
-                ],
-              ),
+                )
+              ],
             ),
           ),
-        ));
+        ),
+      ),
+    );
   }
 }
-*/
