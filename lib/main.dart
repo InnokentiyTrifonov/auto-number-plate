@@ -203,6 +203,9 @@ class NumPage extends StatelessWidget {
                               fontFamily: 'Fe-Font',
                               fontWeight: FontWeight.w100),
                         ),
+                        SizedBox(
+                          width: 7,
+                        ),
                         Text(plate.serialNumber,
                             style: const TextStyle(
                                 fontSize: 34,
